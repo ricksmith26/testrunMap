@@ -86,6 +86,15 @@ export default class App extends React.Component {
             latitudeDelta: 0.0422,
             longitudeDelta: 0.0221
           }}
+          zoom={2}
+          zoomEnabled={true}
+          scrollEnabled={true}
+          showsScale={true}
+          mapType="satellite"
+          showsMyLocationButton={true}
+          showsScale={true}
+          showsCompass={true}
+          loadingIndicatorColor="#228B22"
         >
           {
             (this.state.length = 0
@@ -95,7 +104,7 @@ export default class App extends React.Component {
                     latitude: marker.coordinate.latitude,
                     longitude: marker.coordinate.longitude
                   };
-                  console.log(coords, '<>><<><><><<<<<z<<>');
+                  console.log(coords, '<>><<><<><<<<<<<<<<<<<');
                   return (
                     <MapView.Marker
                       key={marker.pageid}
