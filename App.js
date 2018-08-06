@@ -1,8 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View, Button, Animated, Image } from 'react-native';
+
 import { MapView } from 'expo';
 import superagent from 'superagent';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import pin from './assets/001-placeholder-1.png';
+import uAreHere from './assets/004-placeholder.png';
+// import CITHeader from './Header';
 
 export default class App extends React.Component {
   state = {
@@ -49,8 +53,19 @@ export default class App extends React.Component {
           } else {
             this.setState({ landmarks: JSON.parse(response.text) });
             const landmarks = { ...this.state.landmarks.query };
-            const titles = landmarks.geosearch;
-            this.setState({ titles });
+            const markers = landmarks.geosearch.map(function(l) {
+              const marker = {
+                coordinate: {
+                  latitude: l.lat,
+                  longitude: l.lon
+                },
+                title: l.title,
+                distance: l.dist,
+                pageid: l.pageid
+              };
+              return marker;
+            });
+            this.setState({ markers });
           }
         });
     }
@@ -68,29 +83,42 @@ export default class App extends React.Component {
           initialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421
+            latitudeDelta: 0.0422,
+            longitudeDelta: 0.0221
           }}
         >
           {
             (this.state.length = 0
               ? null
-              : this.state.titles.map((marker, index) => {
+              : this.state.markers.map(marker => {
                   const coords = {
-                    latitude: marker.lat,
-                    longitude: marker.lon
+                    latitude: marker.coordinate.latitude,
+                    longitude: marker.coordinate.longitude
                   };
-                  console.log(coords, '<><><<><><><><<<><>');
+                  console.log(coords, '<>><<><><><<<<<z<<>');
                   return (
                     <MapView.Marker
-                      key={index}
+                      key={marker.pageid}
                       coordinate={coords}
                       title={marker.title}
-                      description={`distance: ${marker.dist}m`}
-                    />
+                      description={`distance: ${marker.distance}m`}
+                    >
+                      <Image source={pin} />
+                    </MapView.Marker>
                   );
                 }))
           }
+          <MapView.Marker
+            key={'You are here'}
+            coordinate={{
+              latitude: this.state.latitude,
+              longitude: this.state.longitude
+            }}
+            title={'You are here'}
+            description={'You are here'}
+          >
+            <Image source={uAreHere} />
+          </MapView.Marker>
         </MapView>
       );
     } else {
@@ -102,6 +130,7 @@ export default class App extends React.Component {
             justifyContent: 'center'
           }}
         >
+          {/* <CITHeader /> */}
           <Text>Latitude: {this.state.latitude}</Text>
           <Text>Longitude: {this.state.longitude}</Text>
           {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
@@ -125,5 +154,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  marker: {
+    backgroundColor: '#550bbc',
+    padding: 5,
+    borderRadius: 5
   }
 });
