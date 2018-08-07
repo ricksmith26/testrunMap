@@ -1,11 +1,20 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, Animated, Image } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  Animated,
+  Image,
+  Slider
+} from 'react-native';
 
 import { MapView } from 'expo';
 import superagent from 'superagent';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import pin from './assets/001-placeholder-1.png';
 import uAreHere from './assets/004-placeholder.png';
+import building from './assets/university.png';
 // import CITHeader from './Header';
 
 export default class App extends React.Component {
@@ -17,7 +26,9 @@ export default class App extends React.Component {
     landmarks: {},
     isLoading: true,
     markers: [],
-    titles: []
+    titles: [],
+    distance: 5000,
+    locationInfo: ''
   };
 
   componentDidMount() {
@@ -42,9 +53,9 @@ export default class App extends React.Component {
     if (prevState.request !== this.state.request) {
       superagent
         .get(
-          `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=${
-            this.state.latitude
-          }|${this.state.longitude}&format=json`
+          `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=${
+            this.state.distance
+          }&gscoord=${this.state.latitude}|${this.state.longitude}&format=json`
         )
 
         .end((error, response) => {
@@ -75,7 +86,7 @@ export default class App extends React.Component {
     navigator.geolocation.clearWatch(this.watchId);
   }
   render() {
-    // console.log(this.state, '<<<<<<<<<<<<<<<<<<<<');
+    console.log('render<<<<<<,');
     if (this.state.request) {
       return (
         <MapView
@@ -104,14 +115,44 @@ export default class App extends React.Component {
                     latitude: marker.coordinate.latitude,
                     longitude: marker.coordinate.longitude
                   };
-                  console.log(coords, '<>><<><<><<<<<<<<<<<<<');
+
                   return (
                     <MapView.Marker
                       key={marker.pageid}
                       coordinate={coords}
                       title={marker.title}
                       description={`distance: ${marker.distance}m`}
+                      onPress={() => {
+                        superagent
+                          .get(
+                            `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&pageids=${
+                              marker.pageid
+                            }rvsection=0action=raw`
+                          )
+
+                          .end((error, response) => {
+                            if (error) {
+                              console.error(error);
+                            } else {
+                              var reg = new RegExp('/[0-9]/');
+                              const t = JSON.parse(response.text);
+                              const m = t.query.pages;
+                              console.log(
+                                m[marker.pageid].extract
+                                  .replace(
+                                    /<b>|<\/p>|<\/b>|<h2>|<\/h2>|<p>|<span id=|<\/[a-z]+>|<[a-z]+>|<p class="mw-empty-elt">/g,
+                                    ''
+                                  )
+                                  .replace(/"References">References\s\D+/gi, '')
+                              );
+                            }
+                          });
+                      }}
                     >
+                      <View style={styles.marker}>
+                        <Text>{marker.title}</Text>
+                        <Image source={building} />
+                      </View>
                       <Image source={pin} />
                     </MapView.Marker>
                   );
@@ -131,6 +172,7 @@ export default class App extends React.Component {
         </MapView>
       );
     } else {
+      const val = this.state.distance;
       return (
         <View
           style={{
@@ -139,7 +181,6 @@ export default class App extends React.Component {
             justifyContent: 'center'
           }}
         >
-          {/* <CITHeader /> */}
           <Text>Latitude: {this.state.latitude}</Text>
           <Text>Longitude: {this.state.longitude}</Text>
           {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
@@ -151,6 +192,18 @@ export default class App extends React.Component {
               this.setState({ request: true });
             }}
           />
+          <Text>{'\n'}</Text>
+          <Text>{this.state.distance}</Text>
+          <Slider
+            step={50}
+            minimumValue={500}
+            maximumValue={3000}
+            width={200}
+            value={val}
+            onValueChange={changedVal => {
+              this.setState({ distance: changedVal });
+            }}
+          />
         </View>
       );
     }
@@ -160,13 +213,18 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#66B032',
     alignItems: 'center',
     justifyContent: 'center'
   },
   marker: {
-    backgroundColor: '#550bbc',
-    padding: 5,
-    borderRadius: 5
+    backgroundColor: '#9BD770',
+    padding: 1,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  title: {
+    fontSize: 5
   }
 });
