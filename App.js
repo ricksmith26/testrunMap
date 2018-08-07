@@ -6,7 +6,8 @@ import {
   Button,
   Animated,
   Image,
-  Slider
+  Slider,
+  Header
 } from 'react-native';
 import Tts from 'react-native-tts';
 import { MapView } from 'expo';
@@ -27,7 +28,9 @@ export default class App extends React.Component {
     markers: [],
     titles: [],
     distance: 5000,
-    locationInfo: ''
+    locationInfo: '',
+    latDel: 0,
+    longDel: 0
   };
 
   componentDidMount() {
@@ -63,6 +66,9 @@ export default class App extends React.Component {
           } else {
             this.setState({ landmarks: JSON.parse(response.text) });
             const landmarks = { ...this.state.landmarks.query };
+            let del = 0;
+            let latDel = 0;
+            let longDel = 0;
             const markers = landmarks.geosearch.map(function(l) {
               const marker = {
                 coordinate: {
@@ -73,9 +79,16 @@ export default class App extends React.Component {
                 distance: l.dist,
                 pageid: l.pageid
               };
+              if (l.dist > del) {
+                del = l.dist;
+                latDel = l.lat;
+                longDel = l.lon;
+              }
+
               return marker;
             });
-            this.setState({ markers });
+
+            this.setState({ markers, latDel, longDel });
           }
         });
     }
@@ -85,7 +98,11 @@ export default class App extends React.Component {
     navigator.geolocation.clearWatch(this.watchId);
   }
   render() {
-    console.log('render<<<<<<,');
+    console.log(
+      (this.state.latitude - this.state.latDel) * 2 + 0.006,
+      '<<<<<<<<<<<<<,,',
+      this.state.longitude - this.state.longDel - 0.006
+    );
     if (this.state.request) {
       return (
         <MapView
@@ -145,7 +162,7 @@ export default class App extends React.Component {
                                   /"References">References\s\D+\s?\d?/gi,
                                   ''
                                 );
-                              console.log(tour, '@@@@<><><><><><><@@@');
+                              console.log(tour, '@@@@<><><><><><@@@');
 
                               {
                                 /* Tts.getInitStatus().then(() => {
@@ -181,27 +198,20 @@ export default class App extends React.Component {
     } else {
       const val = this.state.distance;
       return (
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
+        <View style={styles.container}>
+          <Text style={styles.title}>CITeTOURS</Text>
+          <Text>{'\n'}</Text>
+          <Text>{'\n'}</Text>
+          <Text>{'\n'}</Text>
           <Text>Latitude: {this.state.latitude}</Text>
           <Text>Longitude: {this.state.longitude}</Text>
           {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
           <Text>{'\n'}</Text>
-          <Button
-            icon={<Icon name="arrow-right" size={15} color="white" />}
-            title="Search nearby Landmarks"
-            onPress={() => {
-              this.setState({ request: true });
-            }}
-          />
-          <Text>{'\n'}</Text>
           <Text>{this.state.distance}</Text>
+          <Text>{'\n'}</Text>
+
           <Slider
+            color={'#375F1B'}
             step={50}
             minimumValue={500}
             maximumValue={3000}
@@ -211,6 +221,18 @@ export default class App extends React.Component {
               this.setState({ distance: changedVal });
             }}
           />
+          <Text>{'\n'}</Text>
+          <Text>{'\n'}</Text>
+          <Text>{'\n'}</Text>
+          <Button
+            color={'#375F1B'}
+            style={{ color: '#375F1B' }}
+            title="Search nearby Landmarks"
+            onPress={() => {
+              this.setState({ request: true });
+            }}
+          />
+          <Text>{'\n'}</Text>
         </View>
       );
     }
@@ -232,6 +254,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   title: {
-    fontSize: 5
+    fontSize: 40,
+    color: '#375F1B',
+    fontWeight: 'bold'
   }
 });
