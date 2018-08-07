@@ -8,14 +8,13 @@ import {
   Image,
   Slider
 } from 'react-native';
-
+import Tts from 'react-native-tts';
 import { MapView } from 'expo';
 import superagent from 'superagent';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import pin from './assets/001-placeholder-1.png';
 import uAreHere from './assets/004-placeholder.png';
 import building from './assets/university.png';
-// import CITHeader from './Header';
 
 export default class App extends React.Component {
   state = {
@@ -137,14 +136,22 @@ export default class App extends React.Component {
                               var reg = new RegExp('/[0-9]/');
                               const t = JSON.parse(response.text);
                               const m = t.query.pages;
-                              console.log(
-                                m[marker.pageid].extract
-                                  .replace(
-                                    /<b>|<\/p>|<\/b>|<h2>|<\/h2>|<p>|<span id=|<\/[a-z]+>|<[a-z]+>|<p class="mw-empty-elt">/g,
-                                    ''
-                                  )
-                                  .replace(/"References">References\s\D+/gi, '')
-                              );
+                              const tour = m[marker.pageid].extract
+                                .replace(
+                                  /<b>|<\/p>|<\/b>|<h2>|<\/h2>|<p>|<span id=|<\/[a-z]+>|<[a-z]+>|<p class="mw-empty-elt">/g,
+                                  ''
+                                )
+                                .replace(
+                                  /"References">References\s\D+\s?\d?/gi,
+                                  ''
+                                );
+                              console.log(tour, '@@@@<><><><><><><@@@');
+
+                              {
+                                /* Tts.getInitStatus().then(() => {
+                                Tts.speak(tour);
+                              }); */
+                              }
                             }
                           });
                       }}
