@@ -178,7 +178,6 @@ export default class App extends React.Component {
                     >
                       <View style={styles.marker}>
                         <Text>{marker.title}</Text>
-                        <Image source={building} />
                       </View>
                       <Image source={pin} />
                     </MapView.Marker>
@@ -257,7 +256,8 @@ const styles = StyleSheet.create({
     padding: 1,
     borderRadius: 5,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    opacity: 0.7
   },
   title: {
     fontSize: 40,
