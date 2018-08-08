@@ -110,8 +110,8 @@ export default class App extends React.Component {
           initialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
-            latitudeDelta: 0.0422,
-            longitudeDelta: 0.0221
+            latitudeDelta: 0.0222,
+            longitudeDelta: 0.0121
           }}
           zoom={2}
           zoomEnabled={true}
@@ -122,6 +122,9 @@ export default class App extends React.Component {
           showsScale={true}
           showsCompass={true}
           loadingIndicatorColor="#228B22"
+          onRegionChangeComplete={region => {
+            console.log(' region', region);
+          }}
         >
           {
             (this.state.length = 0
@@ -162,7 +165,7 @@ export default class App extends React.Component {
                                   /"References">References\s\D+\s?\d?/gi,
                                   ''
                                 );
-                              console.log(tour, '@@@@<><><><><><@@@');
+                              console.log(tour, '@@@@<><><><><@@@');
 
                               {
                                 /* Tts.getInitStatus().then(() => {
@@ -236,6 +239,9 @@ export default class App extends React.Component {
         </View>
       );
     }
+  }
+  showMarkers(region) {
+    let zoom = Math.round(Math.log(360 / region.longitudeDelta) / Math.LN2);
   }
 }
 
